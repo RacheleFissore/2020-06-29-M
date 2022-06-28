@@ -7,6 +7,7 @@ package it.polito.tdp.imdb;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.imdb.model.Director;
 import it.polito.tdp.imdb.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -18,7 +19,8 @@ import javafx.scene.control.TextField;
 public class FXMLController {
 	
 	private Model model;
-
+	private boolean entrato = false;
+	
     @FXML // ResourceBundle that was given to the FXMLLoader
     private ResourceBundle resources;
 
@@ -35,10 +37,10 @@ public class FXMLController {
     private Button btnCercaAffini; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxAnno"
-    private ComboBox<?> boxAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxRegista"
-    private ComboBox<?> boxRegista; // Value injected by FXMLLoader
+    private ComboBox<Director> boxRegista; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtAttoriCondivisi"
     private TextField txtAttoriCondivisi; // Value injected by FXMLLoader
@@ -48,17 +50,36 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	if(boxAnno.getValue() != null) {
+    		txtResult.clear();
+    		entrato = true;
+    		model.creaGrafo(boxAnno.getValue());
+    		txtResult.appendText("Grafo creato con " + model.getNVertici() + " vertici e " + model.getNArchi() + " archi");
+    		boxRegista.getItems().addAll(model.getVertici());
+    	}
     }
 
     @FXML
     void doRegistiAdiacenti(ActionEvent event) {
-
+    	txtResult.clear();
+    	if(entrato && boxRegista.getValue() != null) {
+    		txtResult.appendText("REGISTI ADIACENTI A: " + boxRegista.getValue());
+    		txtResult.appendText("\n" + model.registiAdiacenti(boxRegista.getValue()));
+    	}
     }
 
     @FXML
     void doRicorsione(ActionEvent event) {
-
+    	txtResult.clear();
+    	if(entrato) {
+    		try {
+				int c = Integer.parseInt(txtAttoriCondivisi.getText());
+				txtResult.appendText(model.trovaPercorso(c, boxRegista.getValue()));
+			} catch (NumberFormatException e) {
+				throw e;
+			}
+    		
+    	}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -76,7 +97,7 @@ public class FXMLController {
    public void setModel(Model model) {
     	
     	this.model = model;
-    	
+    	boxAnno.getItems().addAll(model.getAnni());
     }
     
 }
